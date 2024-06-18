@@ -2,6 +2,9 @@ import os
 import pandas as pd
 from TaxonomyAnalyzer import analyse_taxonomy
 
+"""
+This file is to be used for testing the data analysis for a single model
+"""
 # TODO LATER PROBLY SHOULD MAKE IT SO THAT THE CATALOG PATH COMES IN FROM THE ENV FILE
 # start from the catalog directory
 directory_path = os.path.realpath(r"C:\Users\ttuga\Desktop\Research_Project\Software\sciorDataAnalysis\catalog")
@@ -57,27 +60,30 @@ def read_taxonomy(path, number_of_taxonomies, model_name):
 
 def read_file(file_path):
     df = pd.read_csv(file_path)
+    # print(df)
     return df
 
 
 def read_directory():
     models = os.listdir(directory_path)
     # pick one model
-    for model in models:
-        # skipping the files that are not model directories
-        if not os.path.isdir(os.path.join(directory_path, model)):
-            continue
+    # TODO UNCOMMENT THIS
+    # for model in models:
+    model = models[0]
+    # skipping the files that are not model directories
+    # if not os.path.isdir(os.path.join(directory_path, model)):
+    #     continue
 
-        # go into the model directory
-        path = os.path.join(directory_path, model)
-        number_of_taxonomies = find_number_of_taxonomies(path)
+    # go into the model directory
+    path = os.path.join(directory_path, model)
+    number_of_taxonomies = find_number_of_taxonomies(path)
 
-        # checking if the model has been tested for test1
-        if os.path.isdir(os.path.join(path, "tt001_ac")) and os.path.isdir(os.path.join(path, "tt001_an")):
-            # trying to read the necessary files
-            read_taxonomy(path, number_of_taxonomies, model)
-        else:
-            continue
+    # checking if the model has been tested for test1
+    # if os.path.isdir(os.path.join(path, "tt001_ac")) and os.path.isdir(os.path.join(path, "tt001_an")):
+        # trying to read the necessary files
+    read_taxonomy(path, number_of_taxonomies, model)
+    # else:
+    #     continue
 
 
 def is_ttl_file(file_path):
