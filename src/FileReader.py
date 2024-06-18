@@ -10,6 +10,14 @@ check_complete = True
 
 def read_taxonomy(path, number_of_taxonomies, model_name):
     for tax_num in range(1, number_of_taxonomies):
+        print(model_name)
+        # checks if the taxonomy is within the exception list
+        # if TAXONOMY_EXCEPTION_DICT.keys().__contains__(model_name):
+        #     if tax_num in TAXONOMY_EXCEPTION_DICT[model_name]:
+        #         continue
+        #     if 0 in TAXONOMY_EXCEPTION_DICT[model_name]:
+        #         continue
+
         # read data_modelName_txnumber.csv
         read_file(os.path.join(path, "data_" + model_name + "_tx" + '{:03}'.format(tax_num) + ".csv"))
 
@@ -39,11 +47,23 @@ def read_directory():
     models = os.listdir(directory_path)
     # pick one model
     for model in models:
+        # skipping the files that are not model directories
+        if not os.path.isdir(os.path.join(directory_path, model)):
+            continue
+
         # go into the model directory
         path = os.path.join(directory_path, model)
         number_of_taxonomies = find_number_of_taxonomies(path)
+
+        # checking if the model has been tested for test1
         if os.path.isdir(os.path.join(path, "tt001_ac")) and os.path.isdir(os.path.join(path, "tt001_an")):
-            read_taxonomy(path, number_of_taxonomies, model)
+            # trying to read the necessary files
+            try:
+                read_taxonomy(path, number_of_taxonomies, model)
+            except FileNotFoundError:
+                # TODO MIGHT BE ABLE TO ADD THE MODEL AND THE TAXONOMY TO THE EXCEPTION LIST FROM HERE
+                # THAT WAY WE WOULD HAVE A CONCRETE VIEW OF THE SKIPPED TAXONOMIES
+                continue
         else:
             continue
 
@@ -59,6 +79,26 @@ def find_number_of_taxonomies(model_path):
     turtles = [entry for entry in entries if is_ttl_file(os.path.join(model_path, entry))]
     return len(turtles)
 
+
+# """A dictionary that holds all the taxonomies that should be skipped while evaluating the dataset. The reason for
+# skipping these taxonomies is that the dataset lacks one of the documents required for this evaluation on this taxonomy
+# Key: the name of the model
+# Value: an array that holds the numbers of the taxonomies that should be skipped
+# """
+# TAXONOMY_EXCEPTION_DICT = {
+#     "albuquerque2011ontobio": [7],
+#     "amaral2020game-theory": [2, 3],
+#     # ^ think 4 should also give an error, but it's not doing that, maybe check it manually
+#     "aristotle-ontology2019": [13],
+#     "bernasconi2021ontovcm": [7],
+#     "cmpo2017": [3],
+#     "derave2019dpo": [6, 8, 18],
+#     "dpo2017": [3, 4],
+#     "ferreira2015ontoemergeplan": [2, 3, 5, 7, 9, 10, 15, 16],
+#     "gi2mo": [2, 3],
+#     "guizzardi2020decision-making": [1],
+#     "guizzardi2022ufo": [9]
+# }
 
 if __name__ == "__main__":
     read_directory()
