@@ -134,6 +134,7 @@ def find_number_of_taxonomies(model_path):
 STRATEGIES = [
     'ROOT',
     'LEAF',
+    'INTERMEDIATE',
     'SORTAL',
     'NON_SORTAL',
     'RIGID',

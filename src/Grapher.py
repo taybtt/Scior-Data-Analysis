@@ -26,14 +26,14 @@ def make_strategy_graph(strategy_statistics):
     bars3 = ax.bar(x + width / 2, strategy_classif_diff, width, label='classif_diff')
 
     ax.set_xlabel('Execution of the Element as Initial Seeding')
-    ax.set_ylabel('Information Gained Percentage')
-    ax.set_title('Percentage Information Gained Comparison of Different Strategies')
+    ax.set_ylabel('Mean of Information Gained Percentage')
+    ax.set_title('Mean of Percentage Information Gained Comparison of Different Strategies')
 
     ax.set_ylim(0, 100)
     ax.set_xticks(x)
 
     # TODO SHOULD BE STRATEGY NAMES
-    ax.set_xticklabels(['R', 'L', 'S', 'NS', 'RG', 'ARG', 'SRG'])
+    ax.set_xticklabels(['R', 'L', 'I', 'S', 'NS', 'RG', 'ARG', 'SRG'])
     ax.legend()
 
     plot_name = 'strategy_comparison_graph.png'

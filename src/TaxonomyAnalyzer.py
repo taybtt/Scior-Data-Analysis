@@ -37,6 +37,7 @@ def analyse_data(model_data):
         element_data['gufo_classification'] = model_data.loc[i, 'gufo_classification']
         element_data['is_root'] = model_data.loc[i, 'is_root']
         element_data['is_leaf'] = model_data.loc[i, 'is_leaf']
+        element_data['is_intermediate'] = model_data.loc[i, 'is_intermediate']
         element_data['number_superclasses'] = model_data.loc[i, 'number_superclasses']
         element_data['number_subclasses'] = model_data.loc[i, 'number_subclasses']
 
@@ -61,6 +62,14 @@ def enforce_strategy_on_elements(strategy, elements, elements_statistics):
             elements_to_be_removed = []
             for element in elements.keys():
                 if not elements[element]['is_leaf']:
+                    elements_to_be_removed.append(element)
+            for element in elements_to_be_removed:
+                del elements[element]
+                del elements_statistics[element]
+        case 'INTERMEDIATE':
+            elements_to_be_removed = []
+            for element in elements.keys():
+                if not elements[element]['is_intermediate']:
                     elements_to_be_removed.append(element)
             for element in elements_to_be_removed:
                 del elements[element]
