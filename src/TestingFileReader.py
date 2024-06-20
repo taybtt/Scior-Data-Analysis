@@ -14,6 +14,7 @@ check_complete = True
 
 def read_taxonomy(path, number_of_taxonomies, model_name):
     for tax_num in range(1, number_of_taxonomies+1):
+        taxonomy_name = model_name + "_tx" + '{:03}'.format(tax_num)
         # print(model_name)
         # checks if the taxonomy is within the exception list
         # if TAXONOMY_EXCEPTION_DICT.keys().__contains__(model_name):
@@ -55,7 +56,7 @@ def read_taxonomy(path, number_of_taxonomies, model_name):
                 continue
 
         # store or use the read data probly with pandas
-        analyse_taxonomy(model_data, model_statistics)
+        analyse_taxonomy(model_data, model_statistics, taxonomy_name)
 
 
 def read_file(file_path):
