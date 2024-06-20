@@ -1,4 +1,6 @@
 import os
+import statistics
+
 import pandas as pd
 from TaxonomyAnalyzer import analyse_taxonomy
 
@@ -13,6 +15,9 @@ check_complete = True
 
 
 def read_taxonomy(path, number_of_taxonomies, model_name):
+    diff_pk = []
+    diff_tk = []
+    classif_diff = []
     for tax_num in range(1, number_of_taxonomies+1):
         taxonomy_name = model_name + "_tx" + '{:03}'.format(tax_num)
         # print(model_name)
@@ -56,7 +61,11 @@ def read_taxonomy(path, number_of_taxonomies, model_name):
                 continue
 
         # store or use the read data probly with pandas
-        analyse_taxonomy(model_data, model_statistics, taxonomy_name)
+        diff_pk_mean, diff_tk_mean, classif_diff_mean = analyse_taxonomy(model_data, model_statistics, taxonomy_name)
+        diff_pk.append(diff_pk_mean)
+        diff_tk.append(diff_tk_mean)
+        classif_diff.append(classif_diff_mean)
+    return statistics.mean(diff_pk), statistics.mean(diff_tk), statistics.mean(classif_diff)
 
 
 def read_file(file_path):

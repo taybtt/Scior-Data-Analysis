@@ -1,27 +1,30 @@
 import os
 import matplotlib.pyplot as plt
 import numpy as np
+from TaxonomyStatistics import taxonomy_mean
 
 plots_directory = r"C:\Users\ttuga\Desktop\Research_Project\Software\sciorDataAnalysis\plots"
 
 
-def analyse_taxonomy(model_data, model_statistics, taxonomy_name):
+def analyse_taxonomy(model_data, model_statistics, taxonomy_name, strategy):
     # the first part is the row, the second part is the column
     # print(model_data.loc[0, 'class_name'])
 
     # the classes within the taxonomy with their extracted class information
-    strategy = ''
     elements = analyse_data(model_data)
     elements_statistics = analyse_statistics(model_statistics, elements)
     elements, elements_statistics = enforce_strategy_on_elements(strategy, elements, elements_statistics)
     # print(elements)
-    print(elements_statistics)
+    # print(elements_statistics)
+
+
 
     # make_class_graph(elements_statistics, taxonomy_name)
 
     # make_classification_graph(elements_statistics, taxonomy_name)
 
-    make_graph(elements_statistics, taxonomy_name)
+    # make_graph(elements_statistics, taxonomy_name)
+    return taxonomy_mean(elements, elements_statistics)
 
 
 def analyse_data(model_data):
@@ -46,7 +49,7 @@ def enforce_strategy_on_elements(strategy, elements, elements_statistics):
     # TODO IF YOU HAVE THE TIME, ADD THE HIGHEST/LOWEST SUPERCLASS/SUBCLASS COUNTS INTO THE MIX
     # removes the elements that do not belong to the strategy of the run
     match strategy:
-        case "root":
+        case "ROOT":
             elements_to_be_removed = []
             for element in elements.keys():
                 if not elements[element]['is_root']:
@@ -54,7 +57,7 @@ def enforce_strategy_on_elements(strategy, elements, elements_statistics):
             for element in elements_to_be_removed:
                 del elements[element]
                 del elements_statistics[element]
-        case "leaf":
+        case "LEAF":
             elements_to_be_removed = []
             for element in elements.keys():
                 if not elements[element]['is_leaf']:
@@ -62,7 +65,7 @@ def enforce_strategy_on_elements(strategy, elements, elements_statistics):
             for element in elements_to_be_removed:
                 del elements[element]
                 del elements_statistics[element]
-        case "sortal":
+        case "SORTAL":
             elements_to_be_removed = []
             for element in elements.keys():
                 gufo_class = elements[element]['gufo_classification']
@@ -72,7 +75,7 @@ def enforce_strategy_on_elements(strategy, elements, elements_statistics):
             for element in elements_to_be_removed:
                 del elements[element]
                 del elements_statistics[element]
-        case "non_sortal":
+        case "NON_SORTAL":
             elements_to_be_removed = []
             for element in elements.keys():
                 gufo_class = elements[element]['gufo_classification']
@@ -81,7 +84,7 @@ def enforce_strategy_on_elements(strategy, elements, elements_statistics):
             for element in elements_to_be_removed:
                 del elements[element]
                 del elements_statistics[element]
-        case "rigid":
+        case "RIGID":
             elements_to_be_removed = []
             for element in elements.keys():
                 gufo_class = elements[element]['gufo_classification']
@@ -90,7 +93,7 @@ def enforce_strategy_on_elements(strategy, elements, elements_statistics):
             for element in elements_to_be_removed:
                 del elements[element]
                 del elements_statistics[element]
-        case "anti_rigid":
+        case "ANTI_RIGID":
             elements_to_be_removed = []
             for element in elements.keys():
                 gufo_class = elements[element]['gufo_classification']
@@ -100,7 +103,7 @@ def enforce_strategy_on_elements(strategy, elements, elements_statistics):
             for element in elements_to_be_removed:
                 del elements[element]
                 del elements_statistics[element]
-        case "semi_rigid":
+        case "SEMI-RIGID":
             elements_to_be_removed = []
             for element in elements.keys():
                 gufo_class = elements[element]['gufo_classification']
@@ -117,6 +120,7 @@ def enforce_strategy_on_elements(strategy, elements, elements_statistics):
 
 def analyse_statistics(model_statistics, elements):
     elements_statistics = dict()
+    # print(elements.keys())
     i = 0
     for key in elements.keys():
         stats = dict()
@@ -131,7 +135,6 @@ def analyse_statistics(model_statistics, elements):
     return elements_statistics
 
 
-# TODO CHANGE THE MAX NUMBER OF ALL GRAPHS TO 100
 def make_class_graph(elements_statistics, taxonomy_name):
     # plt.style.use('seaborn-whitegrid')
     # adding the values into the graph axis
