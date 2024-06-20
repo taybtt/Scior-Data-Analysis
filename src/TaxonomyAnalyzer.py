@@ -10,21 +10,95 @@ def analyse_taxonomy(model_data, model_statistics, taxonomy_name):
     # print(model_data.loc[0, 'class_name'])
 
     # the classes within the taxonomy with their extracted class information
+    strategy = 'rigid'
     elements = analyse_data(model_data)
+    elements = enforce_strategy_on_elements(strategy, elements)
+    print(elements)
     # print(elements)
-    elements_statistics = analyse_statistics(model_statistics, elements)
-    # print(elements_statistics)
-    make_class_graph(elements_statistics, taxonomy_name)
+    # elements_statistics = analyse_statistics(model_statistics, elements)
+    # # print(elements_statistics)
+    # make_class_graph(elements_statistics, taxonomy_name)
 
 
 def analyse_data(model_data):
     elements = dict()
     for i in range(0, len(model_data)):
         # add all the necessary information about an element to the dictionary with the element name as the key
-        elements[model_data.loc[i, 'class_name']] = [model_data.loc[i, 'is_root'],
-                                                     model_data.loc[i, 'is_leaf'],
-                                                     model_data.loc[i, 'number_superclasses'],
-                                                     model_data.loc[i, 'number_subclasses']]
+        element_data = dict()
+
+        # adding each field of importance from the table to a dictionary
+        element_data['gufo_classification'] = model_data.loc[i, 'gufo_classification']
+        element_data['is_root'] = model_data.loc[i, 'is_root']
+        element_data['is_leaf'] = model_data.loc[i, 'is_leaf']
+        element_data['number_superclasses'] = model_data.loc[i, 'number_superclasses']
+        element_data['number_subclasses'] = model_data.loc[i, 'number_subclasses']
+
+        # adding the element dictionary into a dictionary of elements
+        elements[model_data.loc[i, 'class_name']] = element_data
+    return elements
+
+
+def enforce_strategy_on_elements(strategy, elements):
+    # TODO IF YOU HAVE THE TIME, ADD THE HIGHEST/LOWEST SUPERCLASS/SUBCLASS COUNTS INTO THE MIX
+    # removes the elements that do not belong to the strategy of the run
+    match strategy:
+        case "root":
+            elements_to_be_removed = []
+            for element in elements.keys():
+                if not elements[element]['is_root']:
+                    elements_to_be_removed.append(element)
+            for element in elements_to_be_removed:
+                del elements[element]
+        case "leaf":
+            elements_to_be_removed = []
+            for element in elements.keys():
+                if not elements[element]['is_leaf']:
+                    elements_to_be_removed.append(element)
+            for element in elements_to_be_removed:
+                del elements[element]
+        case "sortal":
+            elements_to_be_removed = []
+            for element in elements.keys():
+                gufo_class = elements[element]['gufo_classification']
+                if not (gufo_class == 'kind' or gufo_class == 'subkind' or gufo_class == 'phase' or
+                        gufo_class == 'role'):
+                    elements_to_be_removed.append(element)
+            for element in elements_to_be_removed:
+                del elements[element]
+        case "non_sortal":
+            elements_to_be_removed = []
+            for element in elements.keys():
+                gufo_class = elements[element]['gufo_classification']
+                if gufo_class == 'kind' or gufo_class == 'subkind' or gufo_class == 'phase' or gufo_class == 'role':
+                    elements_to_be_removed.append(element)
+            for element in elements_to_be_removed:
+                del elements[element]
+        case "rigid":
+            elements_to_be_removed = []
+            for element in elements.keys():
+                gufo_class = elements[element]['gufo_classification']
+                if not (gufo_class == 'kind' or gufo_class == 'subkind' or gufo_class == 'category'):
+                    elements_to_be_removed.append(element)
+            for element in elements_to_be_removed:
+                del elements[element]
+        case "anti_rigid":
+            elements_to_be_removed = []
+            for element in elements.keys():
+                gufo_class = elements[element]['gufo_classification']
+                if not (gufo_class == 'phase' or gufo_class == 'role' or gufo_class == 'phasemixin' or
+                        gufo_class == 'rolemixin'):
+                    elements_to_be_removed.append(element)
+            for element in elements_to_be_removed:
+                del elements[element]
+        case "semi_rigid":
+            elements_to_be_removed = []
+            for element in elements.keys():
+                gufo_class = elements[element]['gufo_classification']
+                if not (gufo_class == 'mixin'):
+                    elements_to_be_removed.append(element)
+            for element in elements_to_be_removed:
+                del elements[element]
+
     return elements
 
 
