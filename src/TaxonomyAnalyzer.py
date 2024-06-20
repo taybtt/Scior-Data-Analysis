@@ -10,14 +10,18 @@ def analyse_taxonomy(model_data, model_statistics, taxonomy_name):
     # print(model_data.loc[0, 'class_name'])
 
     # the classes within the taxonomy with their extracted class information
-    strategy = 'rigid'
+    strategy = ''
     elements = analyse_data(model_data)
-    elements = enforce_strategy_on_elements(strategy, elements)
-    print(elements)
+    elements_statistics = analyse_statistics(model_statistics, elements)
+    elements, elements_statistics = enforce_strategy_on_elements(strategy, elements, elements_statistics)
     # print(elements)
-    # elements_statistics = analyse_statistics(model_statistics, elements)
-    # # print(elements_statistics)
+    print(elements_statistics)
+
     # make_class_graph(elements_statistics, taxonomy_name)
+
+    # make_classification_graph(elements_statistics, taxonomy_name)
+
+    make_graph(elements_statistics, taxonomy_name)
 
 
 def analyse_data(model_data):
@@ -38,7 +42,7 @@ def analyse_data(model_data):
     return elements
 
 
-def enforce_strategy_on_elements(strategy, elements):
+def enforce_strategy_on_elements(strategy, elements, elements_statistics):
     # TODO IF YOU HAVE THE TIME, ADD THE HIGHEST/LOWEST SUPERCLASS/SUBCLASS COUNTS INTO THE MIX
     # removes the elements that do not belong to the strategy of the run
     match strategy:
@@ -49,6 +53,7 @@ def enforce_strategy_on_elements(strategy, elements):
                     elements_to_be_removed.append(element)
             for element in elements_to_be_removed:
                 del elements[element]
+                del elements_statistics[element]
         case "leaf":
             elements_to_be_removed = []
             for element in elements.keys():
@@ -56,6 +61,7 @@ def enforce_strategy_on_elements(strategy, elements):
                     elements_to_be_removed.append(element)
             for element in elements_to_be_removed:
                 del elements[element]
+                del elements_statistics[element]
         case "sortal":
             elements_to_be_removed = []
             for element in elements.keys():
@@ -65,6 +71,7 @@ def enforce_strategy_on_elements(strategy, elements):
                     elements_to_be_removed.append(element)
             for element in elements_to_be_removed:
                 del elements[element]
+                del elements_statistics[element]
         case "non_sortal":
             elements_to_be_removed = []
             for element in elements.keys():
@@ -73,6 +80,7 @@ def enforce_strategy_on_elements(strategy, elements):
                     elements_to_be_removed.append(element)
             for element in elements_to_be_removed:
                 del elements[element]
+                del elements_statistics[element]
         case "rigid":
             elements_to_be_removed = []
             for element in elements.keys():
@@ -81,6 +89,7 @@ def enforce_strategy_on_elements(strategy, elements):
                     elements_to_be_removed.append(element)
             for element in elements_to_be_removed:
                 del elements[element]
+                del elements_statistics[element]
         case "anti_rigid":
             elements_to_be_removed = []
             for element in elements.keys():
@@ -90,6 +99,7 @@ def enforce_strategy_on_elements(strategy, elements):
                     elements_to_be_removed.append(element)
             for element in elements_to_be_removed:
                 del elements[element]
+                del elements_statistics[element]
         case "semi_rigid":
             elements_to_be_removed = []
             for element in elements.keys():
@@ -98,21 +108,30 @@ def enforce_strategy_on_elements(strategy, elements):
                     elements_to_be_removed.append(element)
             for element in elements_to_be_removed:
                 del elements[element]
+                del elements_statistics[element]
+        case _:
+            return elements, elements_statistics
 
-    return elements
+    return elements, elements_statistics
 
 
 def analyse_statistics(model_statistics, elements):
     elements_statistics = dict()
     i = 0
     for key in elements.keys():
-        elements_statistics[key] = [model_statistics.loc[i, 'diff_pk_classes_types_p'],
-                                    model_statistics.loc[i, 'diff_tk_classes_types_p'],
-                                    model_statistics.loc[i, 'diff_unknown_classif_types_p']]
+        stats = dict()
+        stats['diff_pk_classes_types_p'] = model_statistics.loc[i, 'diff_pk_classes_types_p']
+        stats['diff_tk_classes_types_p'] = model_statistics.loc[i, 'diff_tk_classes_types_p']
+        stats['diff_known_classif_types_p'] = model_statistics.loc[i, 'diff_known_classif_types_p']
+        elements_statistics[key] = stats
+        # elements_statistics[key] = [model_statistics.loc[i, 'diff_pk_classes_types_p'],
+        #                             model_statistics.loc[i, 'diff_tk_classes_types_p'],
+        #                             model_statistics.loc[i, 'diff_unknown_classif_types_p']]
         i = i + 1
     return elements_statistics
 
 
+# TODO CHANGE THE MAX NUMBER OF ALL GRAPHS TO 100
 def make_class_graph(elements_statistics, taxonomy_name):
     # plt.style.use('seaborn-whitegrid')
     # adding the values into the graph axis
@@ -121,27 +140,92 @@ def make_class_graph(elements_statistics, taxonomy_name):
     diff_tk = []
     for element in elements_statistics.keys():
         element_names.append(element)
-        diff_pk.append(elements_statistics.get(element)[0])
-        diff_tk.append(elements_statistics.get(element)[1])
+        diff_pk.append(elements_statistics[element]['diff_pk_classes_types_p'])
+        diff_tk.append(elements_statistics[element]['diff_tk_classes_types_p'])
 
     # print(diff_pk)
     # print(diff_tk)
     x = np.arange(len(element_names))
 
-    width = 0.35
-
     fig, ax = plt.subplots()
-    bars1 = ax.bar(x - width / 2, diff_pk, width, label='diff_pk')
-    bars2 = ax.bar(x + width / 2, diff_tk, width, label='diff_tk')
+    bars1 = ax.bar(x, diff_pk, bottom=diff_tk, label='diff_pk')
+    bars2 = ax.bar(x, diff_tk, label='diff_tk')
 
     ax.set_xlabel('Execution of the Element')
-    ax.set_ylabel('Class Information Gains')
-    ax.set_title('Information Gains Compared from Different Elements')
+    ax.set_ylabel('Class Information Gained')
+    ax.set_title('Percentage Class Information Gained Compared from Different Elements')
+
+    ax.set_ylim(0, 100)
     ax.set_xticks(x)
     ax.set_xticklabels(element_names)
     ax.legend()
 
     plot_name = taxonomy_name + '_class_graph.png'
+    plt.savefig(os.path.join(plots_directory, plot_name))
+
+    plt.show()
+
+
+def make_classification_graph(elements_statistics, taxonomy_name):
+    # adding the values into the graph axis
+    element_names = []
+    classif_diff = []
+    for element in elements_statistics.keys():
+        element_names.append(element)
+        classif_diff.append(elements_statistics[element]['diff_known_classif_types_p'])
+
+    x = np.arange(len(element_names))
+
+    fig, ax = plt.subplots()
+    bars = ax.bar(x, classif_diff, label='classif_diff')
+
+    ax.set_xlabel('Execution of the Element')
+    ax.set_ylabel('Classification Information Gained')
+    ax.set_title('Percentage Classification Information Gained Compared from Different Elements')
+
+    ax.set_ylim(0, 100)
+    ax.set_xticks(x)
+    ax.set_xticklabels(element_names)
+    ax.legend()
+
+    plot_name = taxonomy_name + '_classification_graph.png'
+    plt.savefig(os.path.join(plots_directory, plot_name))
+
+    plt.show()
+
+
+def make_graph(elements_statistics, taxonomy_name):
+    # plt.style.use('seaborn-whitegrid')
+    # adding the values into the graph axis
+    element_names = []
+    diff_pk = []
+    diff_tk = []
+    classif_diff = []
+    for element in elements_statistics.keys():
+        element_names.append(element)
+        diff_pk.append(elements_statistics[element]['diff_pk_classes_types_p'])
+        diff_tk.append(elements_statistics[element]['diff_tk_classes_types_p'])
+        classif_diff.append(elements_statistics[element]['diff_known_classif_types_p'])
+
+    x = np.arange(len(element_names))
+
+    width = 0.35
+
+    fig, ax = plt.subplots()
+    bars1 = ax.bar(x - width / 2, diff_pk, width, bottom=diff_tk, label='diff_pk')
+    bars2 = ax.bar(x - width / 2, diff_tk, width, label='diff_tk')
+    bars3 = ax.bar(x + width / 2, classif_diff, width, label='classif_diff')
+
+    ax.set_xlabel('Execution of the Element')
+    ax.set_ylabel('Information Gained')
+    ax.set_title('Percentage Information Gained Compared from Different Elements')
+
+    ax.set_ylim(0, 100)
+    ax.set_xticks(x)
+    ax.set_xticklabels(element_names)
+    ax.legend()
+
+    plot_name = taxonomy_name + '_graph.png'
     plt.savefig(os.path.join(plots_directory, plot_name))
 
     plt.show()
