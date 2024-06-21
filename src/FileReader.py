@@ -12,7 +12,7 @@ directory_path = os.path.realpath(r"C:\Users\ttuga\Desktop\Research_Project\Soft
 check_complete = True
 
 
-def read_taxonomy(path, number_of_taxonomies, model_name, strategy):
+def read_taxonomy(path, number_of_taxonomies, model_name, strategy, sub_super_strategy, min_max_strategy):
     model_diff_pks = []
     model_diff_tks = []
     model_classif_diffs = []
@@ -64,7 +64,7 @@ def read_taxonomy(path, number_of_taxonomies, model_name, strategy):
         # if we get statistics error, that is because this taxonomy doesn't have any classes
         # that conform to the strategy we are using, thus we skip the taxonomy
         try:
-            taxonomy_diff_pk_mean, taxonomy_diff_tk_mean, taxonomy_classif_diff_mean = analyse_taxonomy(model_data, model_statistics, taxonomy_name, strategy)
+            taxonomy_diff_pk_mean, taxonomy_diff_tk_mean, taxonomy_classif_diff_mean = analyse_taxonomy(model_data, model_statistics, taxonomy_name, strategy, sub_super_strategy, min_max_strategy)
             model_diff_pks.append(taxonomy_diff_pk_mean)
             model_diff_tks.append(taxonomy_diff_tk_mean)
             model_classif_diffs.append(taxonomy_classif_diff_mean)
@@ -80,43 +80,59 @@ def read_file(file_path):
 
 def read_directory():
     models = os.listdir(directory_path)
-    # pick one model
-    strategy_statistics = dict()
-    for strategy in STRATEGIES:
-        graph_diff_pks = []
-        graph_diff_tks = []
-        graph_classif_diffs = []
-        for model in models:
-            # if not (model == 'abel2015petroleum-system' or model == 'abrahao2018agriculture-operations'):
-            #     continue
-            # skipping the files that are not model directories
-            if not os.path.isdir(os.path.join(directory_path, model)):
+    for sub_super_strategy in SUB_SUPER_STRATEGIES:
+        iteration_count = 0
+        # print(iteration_count, sub_super_strategy)
+        for min_max_strategy in MIN_MAX_STRATEGIES:
+            # we skip the rest of the iterations for NONE since there should only be one graph of means of strategies
+            if sub_super_strategy == "NONE" and iteration_count > 0:
                 continue
 
-            # go into the model directory
-            path = os.path.join(directory_path, model)
-            number_of_taxonomies = find_number_of_taxonomies(path)
+            # pick one model
+            strategy_statistics = dict()
+            for strategy in STRATEGIES:
+                graph_diff_pks = []
+                graph_diff_tks = []
+                graph_classif_diffs = []
+                for model in models:
+                    # if not (model == 'abel2015petroleum-system'):
+                    #     continue
+                    # skipping the files that are not model directories
+                    if not os.path.isdir(os.path.join(directory_path, model)):
+                        continue
 
-            # checking if the model has been tested for test1
-            if os.path.isdir(os.path.join(path, "tt001_ac")) and os.path.isdir(os.path.join(path, "tt001_an")):
-                # trying to read the necessary files
+                    # go into the model directory
+                    path = os.path.join(directory_path, model)
+                    number_of_taxonomies = find_number_of_taxonomies(path)
+
+                    # checking if the model has been tested for test1
+                    if os.path.isdir(os.path.join(path, "tt001_ac")) and os.path.isdir(os.path.join(path, "tt001_an")):
+                        # trying to read the necessary files
+                        try:
+                            # adds the means of the models into the graph list for the said attribute
+                            model_diff_pk_mean, model_diff_tk_mean, model_classif_diff_mean = (
+                                read_taxonomy(path, number_of_taxonomies, model, strategy, sub_super_strategy, min_max_strategy))
+                            graph_diff_pks.append(model_diff_pk_mean)
+                            graph_diff_tks.append(model_diff_tk_mean)
+                            graph_classif_diffs.append(model_classif_diff_mean)
+                        except KeyError:
+                            # TODO: THIS IS THE MODEL EXCEPTION LIST, DONT FORGET TO REMOVE/DOCUMENT IT
+                            continue
+                        except statistics.StatisticsError:
+                            # if we get this, it is because the model doesn't have a single class in any of its taxonomies
+                            # that conform to the strategy we are using, thus we skip the model
+                            continue
+                    else:
+                        continue
                 try:
-                    model_diff_pk_mean, model_diff_tk_mean, model_classif_diff_mean = (
-                        read_taxonomy(path, number_of_taxonomies, model, strategy))
-                    graph_diff_pks.append(model_diff_pk_mean)
-                    graph_diff_tks.append(model_diff_tk_mean)
-                    graph_classif_diffs.append(model_classif_diff_mean)
-                except KeyError:
-                    # TODO: THIS IS THE MODEL EXCEPTION LIST, DONT FORGET TO REMOVE/DOCUMENT IT
-                    continue
+                    strategy_statistics[strategy] = [statistics.mean(graph_diff_pks), statistics.mean(graph_diff_tks), statistics.mean(graph_classif_diffs)]
                 except statistics.StatisticsError:
                     # if we get this, it is because the model doesn't have a single class in any of its taxonomies
                     # that conform to the strategy we are using, thus we skip the model
                     continue
-            else:
-                continue
-        strategy_statistics[strategy] = [statistics.mean(graph_diff_pks), statistics.mean(graph_diff_tks), statistics.mean(graph_classif_diffs)]
-    make_strategy_graph(strategy_statistics)
+            make_strategy_graph(strategy_statistics, sub_super_strategy, min_max_strategy)
+            iteration_count = iteration_count + 1
+
 
 
 def is_ttl_file(file_path):
@@ -140,6 +156,17 @@ STRATEGIES = [
     'RIGID',
     'ANTI_RIGID',
     'SEMI_RIGID'
+]
+
+SUB_SUPER_STRATEGIES = [
+    'NONE',
+    'SUPERCLASS',
+    'SUBCLASS'
+]
+
+MIN_MAX_STRATEGIES = [
+    'MAX',
+    'MIN'
 ]
 
 # """A dictionary that holds all the taxonomies that should be skipped while evaluating the dataset. The reason for

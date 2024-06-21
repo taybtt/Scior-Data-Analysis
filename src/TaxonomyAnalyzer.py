@@ -6,7 +6,7 @@ from TaxonomyStatistics import taxonomy_mean
 plots_directory = r"C:\Users\ttuga\Desktop\Research_Project\Software\sciorDataAnalysis\plots"
 
 
-def analyse_taxonomy(model_data, model_statistics, taxonomy_name, strategy):
+def analyse_taxonomy(model_data, model_statistics, taxonomy_name, strategy, sub_super_strategy, min_max_strategy):
     # the first part is the row, the second part is the column
     # print(model_data.loc[0, 'class_name'])
 
@@ -14,10 +14,10 @@ def analyse_taxonomy(model_data, model_statistics, taxonomy_name, strategy):
     elements = analyse_data(model_data)
     elements_statistics = analyse_statistics(model_statistics, elements)
     elements, elements_statistics = enforce_strategy_on_elements(strategy, elements, elements_statistics)
+    elements, elements_statistics = enforce_sub_superclass_strategy(elements, elements_statistics, sub_super_strategy,
+                                                                    min_max_strategy)
     # print(elements)
     # print(elements_statistics)
-
-
 
     # make_class_graph(elements_statistics, taxonomy_name)
 
@@ -123,6 +123,57 @@ def enforce_strategy_on_elements(strategy, elements, elements_statistics):
                 del elements_statistics[element]
         case _:
             return elements, elements_statistics
+
+    return elements, elements_statistics
+
+
+def enforce_sub_superclass_strategy(elements, elements_statistics, related_class=None, min_max=None):
+    match related_class:
+        case 'SUPERCLASS':
+            elements, elements_statistics = enforce_min_max_strategy(elements, elements_statistics,
+                                                                     'number_superclasses', min_max)
+            return elements, elements_statistics
+        case 'SUBCLASS':
+            elements, elements_statistics = enforce_min_max_strategy(elements, elements_statistics,
+                                                                     'number_subclasses', min_max)
+            return elements, elements_statistics
+        case _:
+            return elements, elements_statistics
+
+
+def enforce_min_max_strategy(elements, elements_statistics, related_class_string, min_max_string):
+    target_element = None
+    match min_max_string:
+        case 'MAX':
+            number_target_classes = -1
+
+            # checking if the next element has more target_classes than the current target element
+            for element in elements.keys():
+                if elements[element][related_class_string] > number_target_classes:
+                    number_target_classes = elements[element][related_class_string]
+                    target_element = element
+                else:
+                    continue
+        case 'MIN':
+            number_target_classes = float('inf')
+
+            # checking if the next element has less target_classes than the current target element
+            for element in elements.keys():
+                if elements[element][related_class_string] < number_target_classes:
+                    number_target_classes = elements[element][related_class_string]
+                    target_element = element
+                else:
+                    continue
+
+    # removing all elements that is not the target element
+    # needed a temp array since you cannot iterate and delete from a dict at the same time
+    temporary_elements = []
+    for element in elements.keys():
+        temporary_elements.append(element)
+    for element in temporary_elements:
+        if not element == target_element:
+            del elements[element]
+            del elements_statistics[element]
 
     return elements, elements_statistics
 
