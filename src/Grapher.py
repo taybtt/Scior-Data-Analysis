@@ -30,6 +30,7 @@ def make_strategy_graph(strategy_statistics, sub_super_strategy, min_max_strateg
     ax.set_xlabel('Execution of the Element as Initial Seeding')
     ax.set_ylabel('Mean of Information Gained Percentage')
     ax.set_title(generate_graph_name(sub_super_strategy, min_max_strategy))
+    generate_value_text(ax, bars1, bars2, bars3)
 
     ax.set_ylim(0, 100)
     ax.set_xticks(x)
@@ -42,9 +43,23 @@ def make_strategy_graph(strategy_statistics, sub_super_strategy, min_max_strateg
     ax.legend()
 
     plot_name = generate_graph_file_name(sub_super_strategy, min_max_strategy)
-    plt.savefig(os.path.join(plots_directory, plot_name))
+    plt.savefig(os.path.join(graphs_directory, plot_name))
 
     plt.show()
+
+
+def generate_value_text(ax, bars1, bars2, bars3):
+    for bar in bars3:
+        height = bar.get_height()
+        ax.text(bar.get_x() + bar.get_width()/2, height, f'{round(height)}', ha='center', va='bottom', rotation=90)
+
+    for i in range(0, len(bars1)):
+        bar1 = bars1[i]
+        bar2 = bars2[i]
+        height1 = bar1.get_height()
+        height2 = bar2.get_height()
+        ax.text(bar1.get_x() + bar1.get_width()/2, height1+height2, f'{round(height2)}' + '+' + f'{round(height1)}', ha='center',
+                va='bottom', rotation=90)
 
 
 def generate_graph_name(sub_super_strategy, min_max_strategy):
