@@ -8,8 +8,11 @@ from Grapher import make_strategy_graph
 # TODO LATER PROBLY SHOULD MAKE IT SO THAT THE CATALOG PATH COMES IN FROM THE ENV FILE
 # start from the catalog directory
 directory_path = os.path.realpath(r"C:\Users\ttuga\Desktop\Research_Project\Software\sciorDataAnalysis\catalog")
+
 # TODO LATER MAKE SURE TO GET THE COMPLETENESS AS AN ARGUMENT
-check_complete = True
+#  OR PUT THE WHOLE THING IN A FOR LOOP TO RUN THEM BOTH AT THE SAME TIME
+# can change whether to run CWA or OWA from this variable
+check_complete = False
 
 
 def read_taxonomy(path, number_of_taxonomies, model_name, strategy, sub_super_strategy, min_max_strategy):
@@ -130,7 +133,7 @@ def read_directory():
                     # if we get this, it is because the model doesn't have a single class in any of its taxonomies
                     # that conform to the strategy we are using, thus we skip the model
                     continue
-            make_strategy_graph(strategy_statistics, sub_super_strategy, min_max_strategy)
+            make_strategy_graph(strategy_statistics, sub_super_strategy, min_max_strategy, check_complete)
             iteration_count = iteration_count + 1
 
 

@@ -7,7 +7,7 @@ plots_directory = r"C:\Users\ttuga\Desktop\Research_Project\Software\sciorDataAn
 graphs_directory = r"C:\Users\ttuga\Desktop\Research_Project\Software\sciorDataAnalysis\graphs"
 
 
-def make_strategy_graph(strategy_statistics, sub_super_strategy, min_max_strategy):
+def make_strategy_graph(strategy_statistics, sub_super_strategy, min_max_strategy, check_complete):
     strategy_names = []
     strategy_diff_pk = []
     strategy_diff_tk = []
@@ -29,7 +29,7 @@ def make_strategy_graph(strategy_statistics, sub_super_strategy, min_max_strateg
 
     ax.set_xlabel('Execution of the Element as Initial Seeding')
     ax.set_ylabel('Mean of Information Gained Percentage')
-    ax.set_title(generate_graph_name(sub_super_strategy, min_max_strategy))
+    ax.set_title(generate_graph_name(sub_super_strategy, min_max_strategy, check_complete))
     generate_value_text(ax, bars1, bars2, bars3)
 
     ax.set_ylim(0, 100)
@@ -42,7 +42,7 @@ def make_strategy_graph(strategy_statistics, sub_super_strategy, min_max_strateg
     ax.set_xticklabels(['R', 'L', 'I', 'S', 'NS', 'RG', 'ARG', 'SRG'])
     ax.legend()
 
-    plot_name = generate_graph_file_name(sub_super_strategy, min_max_strategy)
+    plot_name = generate_graph_file_name(sub_super_strategy, min_max_strategy, check_complete)
     plt.savefig(os.path.join(graphs_directory, plot_name))
 
     plt.show()
@@ -62,33 +62,45 @@ def generate_value_text(ax, bars1, bars2, bars3):
                 va='bottom', rotation=90)
 
 
-def generate_graph_name(sub_super_strategy, min_max_strategy):
+def generate_graph_name(sub_super_strategy, min_max_strategy, check_complete):
+    graph_name = ''
     match sub_super_strategy:
         case 'NONE':
-            return 'Mean of Percentage Information Gained Comparison of Different Strategies'
+            graph_name = 'Mean of Percentage Information Gained Comparison of Different Strategies'
         case 'SUPERCLASS':
             if min_max_strategy == 'MAX':
-                return 'Mean of Percentage Information Gained Comparison of Different Strategies from Max Superclass Elements'
+                graph_name = 'Mean of Percentage Information Gained Comparison of Different Strategies from Max Superclass Elements'
             else:
-                return 'Mean of Percentage Information Gained Comparison of Different Strategies from Min Superclass Elements'
+                graph_name = 'Mean of Percentage Information Gained Comparison of Different Strategies from Min Superclass Elements'
         case 'SUBCLASS':
             if min_max_strategy == 'MAX':
-                return 'Mean of Percentage Information Gained Comparison of Different Strategies from Max Subclass Elements'
+                graph_name = 'Mean of Percentage Information Gained Comparison of Different Strategies from Max Subclass Elements'
             else:
-                return 'Mean of Percentage Information Gained Comparison of Different Strategies from Min Subclass Elements'
+                graph_name = 'Mean of Percentage Information Gained Comparison of Different Strategies from Min Subclass Elements'
+    if check_complete:
+        graph_name = 'CWA_' + graph_name
+    else:
+        graph_name = 'OWA_' + graph_name
+    return graph_name
 
 
-def generate_graph_file_name(sub_super_strategy, min_max_strategy):
+def generate_graph_file_name(sub_super_strategy, min_max_strategy, check_complete):
+    file_name = ''
     match sub_super_strategy:
         case 'NONE':
-            return 'strategy_comparison_graph.png'
+            file_name = 'strategy_comparison_graph.png'
         case 'SUPERCLASS':
             if min_max_strategy == 'MAX':
-                return 'strategy_comparison_graph_max_superclass.png'
+                file_name = 'strategy_comparison_graph_max_superclass.png'
             else:
-                return 'strategy_comparison_graph_min_superclass.png'
+                file_name = 'strategy_comparison_graph_min_superclass.png'
         case 'SUBCLASS':
             if min_max_strategy == 'MAX':
-                return 'strategy_comparison_graph_max_subclass.png'
+                file_name = 'strategy_comparison_graph_max_subclass.png'
             else:
-                return 'strategy_comparison_graph_min_subclass.png'
+                file_name = 'strategy_comparison_graph_min_subclass.png'
+    if check_complete:
+        file_name = 'CWA_' + file_name
+    else:
+        file_name = 'OWA_' + file_name
+    return file_name
