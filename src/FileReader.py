@@ -14,6 +14,10 @@ directory_path = os.path.realpath(r"C:\Users\ttuga\Desktop\Research_Project\Soft
 # can change whether to run CWA or OWA from this variable
 check_complete = False
 
+# true for only the combined graph, false for only the regular graph, none for both
+# TODO MAKE THE PART OF BEING ABLE TO RUN BOTH AT THE SAME TIME
+combined_graph = True
+
 
 def read_taxonomy(path, number_of_taxonomies, model_name, strategy, sub_super_strategy, min_max_strategy):
     model_diff_pks = []
@@ -46,6 +50,12 @@ def read_taxonomy(path, number_of_taxonomies, model_name, strategy, sub_super_st
                 model_statistics = read_file(
                     os.path.join(test_path,
                                  "statistics_" + model_name + "_tt001_ac_tx" + '{:03}'.format(tax_num) + ".csv"))
+                # skipping taxonomies that have less than 5 classes in them
+                # normally this should have been done with the model data, however,
+                # due to inconsistencies between data and statistics files I have to do it here
+                if len(model_statistics) < 5:
+                    continue
+                # print(len(model_statistics))
             except FileNotFoundError:
                 # TODO MIGHT BE ABLE TO ADD THE MODEL AND THE TAXONOMY TO THE EXCEPTION LIST FROM HERE
                 # THAT WAY WE WOULD HAVE A CONCRETE VIEW OF THE SKIPPED TAXONOMIES
@@ -58,6 +68,12 @@ def read_taxonomy(path, number_of_taxonomies, model_name, strategy, sub_super_st
                 model_statistics = read_file(
                     os.path.join(test_path,
                                  "statistics_" + model_name + "_tt001_aN_tx" + '{:03}'.format(tax_num) + ".csv"))
+                # skipping taxonomies that have less than 5 classes in them
+                # normally this should have been done with the model data, however,
+                # due to inconsistencies between data and statistics files I have to do it here
+                if len(model_statistics) < 5:
+                    continue
+                # print(len(model_statistics))
             except FileNotFoundError:
                 # TODO MIGHT BE ABLE TO ADD THE MODEL AND THE TAXONOMY TO THE EXCEPTION LIST FROM HERE
                 # THAT WAY WE WOULD HAVE A CONCRETE VIEW OF THE SKIPPED TAXONOMIES
@@ -67,7 +83,12 @@ def read_taxonomy(path, number_of_taxonomies, model_name, strategy, sub_super_st
         # if we get statistics error, that is because this taxonomy doesn't have any classes
         # that conform to the strategy we are using, thus we skip the taxonomy
         try:
-            taxonomy_diff_pk_mean, taxonomy_diff_tk_mean, taxonomy_classif_diff_mean = analyse_taxonomy(model_data, model_statistics, taxonomy_name, strategy, sub_super_strategy, min_max_strategy)
+            taxonomy_diff_pk_mean, taxonomy_diff_tk_mean, taxonomy_classif_diff_mean = analyse_taxonomy(model_data,
+                                                                                                        model_statistics,
+                                                                                                        taxonomy_name,
+                                                                                                        strategy,
+                                                                                                        sub_super_strategy,
+                                                                                                        min_max_strategy)
             model_diff_pks.append(taxonomy_diff_pk_mean)
             model_diff_tks.append(taxonomy_diff_tk_mean)
             model_classif_diffs.append(taxonomy_classif_diff_mean)
@@ -114,7 +135,8 @@ def read_directory():
                         try:
                             # adds the means of the models into the graph list for the said attribute
                             model_diff_pk_mean, model_diff_tk_mean, model_classif_diff_mean = (
-                                read_taxonomy(path, number_of_taxonomies, model, strategy, sub_super_strategy, min_max_strategy))
+                                read_taxonomy(path, number_of_taxonomies, model, strategy, sub_super_strategy,
+                                              min_max_strategy))
                             graph_diff_pks.append(model_diff_pk_mean)
                             graph_diff_tks.append(model_diff_tk_mean)
                             graph_classif_diffs.append(model_classif_diff_mean)
@@ -128,14 +150,14 @@ def read_directory():
                     else:
                         continue
                 try:
-                    strategy_statistics[strategy] = [statistics.mean(graph_diff_pks), statistics.mean(graph_diff_tks), statistics.mean(graph_classif_diffs)]
+                    strategy_statistics[strategy] = [statistics.mean(graph_diff_pks), statistics.mean(graph_diff_tks),
+                                                     statistics.mean(graph_classif_diffs)]
                 except statistics.StatisticsError:
                     # if we get this, it is because the model doesn't have a single class in any of its taxonomies
                     # that conform to the strategy we are using, thus we skip the model
                     continue
             make_strategy_graph(strategy_statistics, sub_super_strategy, min_max_strategy, check_complete)
             iteration_count = iteration_count + 1
-
 
 
 def is_ttl_file(file_path):
@@ -170,6 +192,23 @@ SUB_SUPER_STRATEGIES = [
 MIN_MAX_STRATEGIES = [
     'MAX',
     'MIN'
+]
+
+POSITIONAL_STRATEGIES = [
+    'ROOT',
+    'LEAF',
+    'INTERMEDIATE'
+]
+
+SORTALITY_STRATEGIES = [
+    'SORTAL',
+    'NON_SORTAL'
+]
+
+RIGIDITY_STRATEGIES = [
+    'RIGID',
+    'ANTI_RIGID',
+    'SEMI_RIGID'
 ]
 
 # """A dictionary that holds all the taxonomies that should be skipped while evaluating the dataset. The reason for
