@@ -56,6 +56,10 @@ def read_taxonomy(path, number_of_taxonomies, model_name, strategy, sub_super_st
                 if len(model_statistics) < 5:
                     continue
                 # print(len(model_statistics))
+                # reading the summary file to be able to match the execution number with the element name
+                model_summary = read_file(os.path.join(test_path,
+                                                       "summary_" + model_name + "_tt001_ac_tx" + '{:03}'.format(
+                                                           tax_num) + ".csv"))
             except FileNotFoundError:
                 # TODO MIGHT BE ABLE TO ADD THE MODEL AND THE TAXONOMY TO THE EXCEPTION LIST FROM HERE
                 # THAT WAY WE WOULD HAVE A CONCRETE VIEW OF THE SKIPPED TAXONOMIES
@@ -67,12 +71,16 @@ def read_taxonomy(path, number_of_taxonomies, model_name, strategy, sub_super_st
             try:
                 model_statistics = read_file(
                     os.path.join(test_path,
-                                 "statistics_" + model_name + "_tt001_aN_tx" + '{:03}'.format(tax_num) + ".csv"))
+                                 "statistics_" + model_name + "_tt001_an_tx" + '{:03}'.format(tax_num) + ".csv"))
                 # skipping taxonomies that have less than 5 classes in them
                 # normally this should have been done with the model data, however,
                 # due to inconsistencies between data and statistics files I have to do it here
                 if len(model_statistics) < 5:
                     continue
+                # reading the summary file to be able to match the execution number with the element name
+                model_summary = read_file(os.path.join(test_path,
+                                                       "summary_" + model_name + "_tt001_an_tx" + '{:03}'.format(
+                                                           tax_num) + ".csv"))
                 # print(len(model_statistics))
             except FileNotFoundError:
                 # TODO MIGHT BE ABLE TO ADD THE MODEL AND THE TAXONOMY TO THE EXCEPTION LIST FROM HERE
@@ -85,6 +93,7 @@ def read_taxonomy(path, number_of_taxonomies, model_name, strategy, sub_super_st
         try:
             taxonomy_diff_pk_mean, taxonomy_diff_tk_mean, taxonomy_classif_diff_mean = analyse_taxonomy(model_data,
                                                                                                         model_statistics,
+                                                                                                        model_summary,
                                                                                                         taxonomy_name,
                                                                                                         strategy,
                                                                                                         sub_super_strategy,
@@ -140,9 +149,10 @@ def read_directory():
                             graph_diff_pks.append(model_diff_pk_mean)
                             graph_diff_tks.append(model_diff_tk_mean)
                             graph_classif_diffs.append(model_classif_diff_mean)
-                        except KeyError:
-                            # TODO: THIS IS THE MODEL EXCEPTION LIST, DONT FORGET TO REMOVE/DOCUMENT IT
-                            continue
+                        # except KeyError:
+                        #     # TODO: THIS IS THE MODEL EXCEPTION LIST, DONT FORGET TO REMOVE/DOCUMENT IT
+                        #     # skips a model that has inconsistency in its data and statistics files in one of its taxonomies
+                        #     continue
                         except statistics.StatisticsError:
                             # if we get this, it is because the model doesn't have a single class in any of its taxonomies
                             # that conform to the strategy we are using, thus we skip the model
