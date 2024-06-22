@@ -11,8 +11,10 @@ directory_path = os.path.realpath(r"C:\Users\ttuga\Desktop\Research_Project\Soft
 
 # TODO LATER MAKE SURE TO GET THE COMPLETENESS AS AN ARGUMENT
 #  OR PUT THE WHOLE THING IN A FOR LOOP TO RUN THEM BOTH AT THE SAME TIME
+
 # can change whether to run CWA or OWA from this variable
-check_complete = False
+# False for OWA, True for CWA
+check_complete = True
 
 # true for only the combined graph, false for only the regular graph, none for both
 # TODO MAKE THE PART OF BEING ABLE TO RUN BOTH AT THE SAME TIME
@@ -110,7 +112,7 @@ def read_taxonomy(path, number_of_taxonomies, model_name, strategy, sub_super_st
             model_classif_diffs.append(taxonomy_classif_diff_mean)
         except statistics.StatisticsError:
             continue
-    return statistics.mean(model_diff_pks), statistics.mean(model_diff_tks), statistics.mean(model_classif_diffs)
+    return model_diff_pks, model_diff_tks, model_classif_diffs
 
 
 def read_file(file_path):
@@ -131,9 +133,9 @@ def read_directory():
             # pick one model
             strategy_statistics = dict()
             for strategy in STRATEGIES:
-                graph_diff_pks = []
-                graph_diff_tks = []
-                graph_classif_diffs = []
+                catalog_diff_pks = []
+                catalog_diff_tks = []
+                catalog_classif_diffs = []
                 for model in models:
                     # if not (model == 'abel2015petroleum-system'):
                     #     continue
@@ -150,12 +152,14 @@ def read_directory():
                         # trying to read the necessary files
                         try:
                             # adds the means of the models into the graph list for the said attribute
-                            model_diff_pk_mean, model_diff_tk_mean, model_classif_diff_mean = (
+                            model_diff_pk, model_diff_tk, model_classif_diff = (
                                 read_taxonomy(path, number_of_taxonomies, model, strategy, sub_super_strategy,
                                               min_max_strategy))
-                            graph_diff_pks.append(model_diff_pk_mean)
-                            graph_diff_tks.append(model_diff_tk_mean)
-                            graph_classif_diffs.append(model_classif_diff_mean)
+                            # adding all the taxonomy means from that model to the list of means for the entire catalog
+                            for i in range(len(model_diff_pk)):
+                                catalog_diff_pks.append(model_diff_pk[i])
+                                catalog_diff_tks.append(model_diff_tk[i])
+                                catalog_classif_diffs.append(model_classif_diff[i])
                         # except KeyError:
                         #     # TODO: THIS IS THE MODEL EXCEPTION LIST, DONT FORGET TO REMOVE/DOCUMENT IT
                         #     # skips a model that has inconsistency in its data and statistics files in one of its taxonomies
@@ -167,8 +171,8 @@ def read_directory():
                     else:
                         continue
                 try:
-                    strategy_statistics[strategy] = [statistics.mean(graph_diff_pks), statistics.mean(graph_diff_tks),
-                                                     statistics.mean(graph_classif_diffs)]
+                    strategy_statistics[strategy] = [statistics.mean(catalog_diff_pks), statistics.mean(catalog_diff_tks),
+                                                     statistics.mean(catalog_classif_diffs)]
                 except statistics.StatisticsError:
                     # if we get this, it is because the model doesn't have a single class in any of its taxonomies
                     # that conform to the strategy we are using, thus we skip the model
