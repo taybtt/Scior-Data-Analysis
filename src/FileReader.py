@@ -12,7 +12,7 @@ directory_path = os.path.realpath(r"C:\Users\ttuga\Desktop\Research_Project\Soft
 # TODO LATER MAKE SURE TO GET THE COMPLETENESS AS AN ARGUMENT
 #  OR PUT THE WHOLE THING IN A FOR LOOP TO RUN THEM BOTH AT THE SAME TIME
 # can change whether to run CWA or OWA from this variable
-check_complete = False
+check_complete = True
 
 # true for only the combined graph, false for only the regular graph, none for both
 # TODO MAKE THE PART OF BEING ABLE TO RUN BOTH AT THE SAME TIME
@@ -25,6 +25,7 @@ def read_taxonomy(path, number_of_taxonomies, model_name, strategy, sub_super_st
     model_classif_diffs = []
     for tax_num in range(1, number_of_taxonomies + 1):
         taxonomy_name = model_name + "_tx" + '{:03}'.format(tax_num)
+        # print(taxonomy_name)
         # print(model_name)
         # checks if the taxonomy is within the exception list
         # if TAXONOMY_EXCEPTION_DICT.keys().__contains__(model_name):
@@ -39,6 +40,7 @@ def read_taxonomy(path, number_of_taxonomies, model_name, strategy, sub_super_st
         except FileNotFoundError:
             # TODO MIGHT BE ABLE TO ADD THE MODEL AND THE TAXONOMY TO THE EXCEPTION LIST FROM HERE
             # THAT WAY WE WOULD HAVE A CONCRETE VIEW OF THE SKIPPED TAXONOMIES
+            # print(taxonomy_name)
             continue
 
         # go into the tt001_ac for complete and tt001_an for incomplete
@@ -54,6 +56,7 @@ def read_taxonomy(path, number_of_taxonomies, model_name, strategy, sub_super_st
                 # normally this should have been done with the model data, however,
                 # due to inconsistencies between data and statistics files I have to do it here
                 if len(model_statistics) < 5:
+                    # print(taxonomy_name)
                     continue
                 # print(len(model_statistics))
                 # reading the summary file to be able to match the execution number with the element name
@@ -63,6 +66,7 @@ def read_taxonomy(path, number_of_taxonomies, model_name, strategy, sub_super_st
             except FileNotFoundError:
                 # TODO MIGHT BE ABLE TO ADD THE MODEL AND THE TAXONOMY TO THE EXCEPTION LIST FROM HERE
                 # THAT WAY WE WOULD HAVE A CONCRETE VIEW OF THE SKIPPED TAXONOMIES
+                # print(taxonomy_name)
                 continue
         else:
             test_path = os.path.join(path, "tt001_an")
@@ -72,10 +76,12 @@ def read_taxonomy(path, number_of_taxonomies, model_name, strategy, sub_super_st
                 model_statistics = read_file(
                     os.path.join(test_path,
                                  "statistics_" + model_name + "_tt001_an_tx" + '{:03}'.format(tax_num) + ".csv"))
+
                 # skipping taxonomies that have less than 5 classes in them
                 # normally this should have been done with the model data, however,
                 # due to inconsistencies between data and statistics files I have to do it here
                 if len(model_statistics) < 5:
+                    # print(taxonomy_name)
                     continue
                 # reading the summary file to be able to match the execution number with the element name
                 model_summary = read_file(os.path.join(test_path,
@@ -85,6 +91,7 @@ def read_taxonomy(path, number_of_taxonomies, model_name, strategy, sub_super_st
             except FileNotFoundError:
                 # TODO MIGHT BE ABLE TO ADD THE MODEL AND THE TAXONOMY TO THE EXCEPTION LIST FROM HERE
                 # THAT WAY WE WOULD HAVE A CONCRETE VIEW OF THE SKIPPED TAXONOMIES
+                # print(taxonomy_name)
                 continue
 
         # store or use the read data probly with pandas
