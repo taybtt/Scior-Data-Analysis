@@ -66,21 +66,21 @@ def generate_graph_name(sub_super_strategy, min_max_strategy, check_complete):
     graph_name = ''
     match sub_super_strategy:
         case 'NONE':
-            graph_name = 'Mean of Percentage Information Gained Comparison of Different Strategies'
+            graph_name = 'Mean of Percentage Information Gained Comparison\nof Different Strategies'
         case 'SUPERCLASS':
             if min_max_strategy == 'MAX':
-                graph_name = 'Mean of Percentage Information Gained Comparison of Different Strategies from Max Superclass Elements'
+                graph_name = 'Mean of Percentage Information Gained Comparison\nof Different Strategies from Max Superclass Elements'
             else:
-                graph_name = 'Mean of Percentage Information Gained Comparison of Different Strategies from Min Superclass Elements'
+                graph_name = 'Mean of Percentage Information Gained Comparison\nof Different Strategies from Min Superclass Elements'
         case 'SUBCLASS':
             if min_max_strategy == 'MAX':
-                graph_name = 'Mean of Percentage Information Gained Comparison of Different Strategies from Max Subclass Elements'
+                graph_name = 'Mean of Percentage Information Gained Comparison\nof Different Strategies from Max Subclass Elements'
             else:
-                graph_name = 'Mean of Percentage Information Gained Comparison of Different Strategies from Min Subclass Elements'
+                graph_name = 'Mean of Percentage Information Gained Comparison\nof Different Strategies from Min Subclass Elements'
     if check_complete:
-        graph_name = 'CWA_' + graph_name
+        graph_name = 'CWA ' + graph_name
     else:
-        graph_name = 'OWA_' + graph_name
+        graph_name = 'OWA ' + graph_name
     return graph_name
 
 

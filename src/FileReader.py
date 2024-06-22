@@ -12,7 +12,7 @@ directory_path = os.path.realpath(r"C:\Users\ttuga\Desktop\Research_Project\Soft
 # TODO LATER MAKE SURE TO GET THE COMPLETENESS AS AN ARGUMENT
 #  OR PUT THE WHOLE THING IN A FOR LOOP TO RUN THEM BOTH AT THE SAME TIME
 # can change whether to run CWA or OWA from this variable
-check_complete = True
+check_complete = False
 
 # true for only the combined graph, false for only the regular graph, none for both
 # TODO MAKE THE PART OF BEING ABLE TO RUN BOTH AT THE SAME TIME
