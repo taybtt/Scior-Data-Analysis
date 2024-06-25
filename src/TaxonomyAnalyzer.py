@@ -28,6 +28,18 @@ def analyse_taxonomy(model_data, model_statistics, model_summary, taxonomy_name,
     # make_graph(elements_statistics, taxonomy_name)
     return taxonomy_mean(elements, elements_statistics)
 
+def analyse_combined_taxonomy(model_data, model_statistics, model_summary, position, sortality, rigidity):
+    elements = analyse_summary(model_summary)
+    elements_data = analyse_data(model_data)
+    elements_statistics = analyse_statistics(model_statistics, elements)
+    elements, elements_statistics, elements_data = enforce_strategy_on_elements(position, elements, elements_statistics,
+                                                                                elements_data)
+    elements, elements_statistics, elements_data = enforce_strategy_on_elements(sortality, elements, elements_statistics,
+                                                                                elements_data)
+    elements, elements_statistics, elements_data = enforce_strategy_on_elements(rigidity, elements, elements_statistics,
+                                                                                elements_data)
+    return taxonomy_mean(elements, elements_statistics)
+
 
 def analyse_summary(model_summary):
     elements = dict()
