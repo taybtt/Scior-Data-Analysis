@@ -3,9 +3,11 @@ import statistics
 import pandas as pd
 from TaxonomyAnalyzer import analyse_taxonomy, analyse_combined_taxonomy
 from Grapher import make_strategy_graph, make_combined_strategy_graph
+from dotenv import load_dotenv
 
 # start from the catalog (from Scior Dataset) directory
-directory_path = os.path.realpath(r"C:\Users\ttuga\Desktop\Research_Project\Software\sciorDataAnalysis\catalog")
+load_dotenv()
+directory_path = os.getenv('INPUT_DIRECTORY')
 
 # can change whether to run CWA or OWA from this variable
 # False for OWA, True for CWA

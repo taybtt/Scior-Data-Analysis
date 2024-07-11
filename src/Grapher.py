@@ -1,8 +1,10 @@
 import os
 import numpy as np
+from dotenv import load_dotenv
 from matplotlib import pyplot as plt
 
-graphs_directory = r"C:\Users\ttuga\Desktop\Research_Project\Software\sciorDataAnalysis\graphs"
+load_dotenv()
+graphs_directory = os.getenv('OUTPUT_DIRECTORY')
 
 
 def make_strategy_graph(strategy_statistics, check_complete, strategies_to_skip):
