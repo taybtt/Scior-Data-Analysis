@@ -1,22 +1,39 @@
 import statistics
 
 
-def analyse_taxonomy(model_data, model_statistics, model_summary, strategy):
-    # the first part is the row, the second part is the column
-
-    # the classes within the taxonomy with their extracted class information
-    elements = analyse_summary(model_summary)
-    elements_data = analyse_data(model_data)
-    elements_statistics = analyse_statistics(model_statistics, elements)
+def analyse_taxonomy(taxonomy_data, taxonomy_statistics, taxonomy_summary, strategy):
+    """
+    This function oversees the analysis of the taxonomy with the rest of the functions on this file. This function
+    analyses a taxonomy for a strategy comparison graph.
+    :param taxonomy_data: data of the elements from the taxonomy
+    :param taxonomy_statistics: statistics of the elements from the taxonomy
+    :param taxonomy_summary: summary of the elements from the taxonomy
+    :param strategy: strategy the analysis is performed for
+    :return: the means of the taxonomy statistics
+    """
+    elements = analyse_summary(taxonomy_summary)
+    elements_data = analyse_data(taxonomy_data)
+    elements_statistics = analyse_statistics(taxonomy_statistics, elements)
     elements, elements_statistics, elements_data = enforce_strategy_on_elements(strategy, elements, elements_statistics,
                                                                                 elements_data)
-    return taxonomy_mean(elements, elements_statistics)
+    return taxonomy_mean(elements_statistics)
 
 
-def analyse_combined_taxonomy(model_data, model_statistics, model_summary, position, sortality, rigidity):
-    elements = analyse_summary(model_summary)
-    elements_data = analyse_data(model_data)
-    elements_statistics = analyse_statistics(model_statistics, elements)
+def analyse_combined_taxonomy(taxonomy_data, taxonomy_statistics, taxonomy_summary, position, sortality, rigidity):
+    """
+    This function oversees the analysis of the taxonomy with the rest of the functions on this file. This function
+    analyses a taxonomy for a strategy combination graph.
+    :param taxonomy_data: data of the elements from the taxonomy
+    :param taxonomy_statistics: statistics of the elements from the taxonomy
+    :param taxonomy_summary: summary of the elements from the taxonomy
+    :param position: position strategy the analysis is performed for
+    :param sortality: sortality strategy the analysis is performed for
+    :param rigidity: rigidity strategy the analysis is performed for
+    :return: the means of the taxonomy statistics
+    """
+    elements = analyse_summary(taxonomy_summary)
+    elements_data = analyse_data(taxonomy_data)
+    elements_statistics = analyse_statistics(taxonomy_statistics, elements)
     elements, elements_statistics, elements_data = enforce_strategy_on_elements(position, elements, elements_statistics,
                                                                                 elements_data)
     elements, elements_statistics, elements_data = enforce_strategy_on_elements(sortality, elements,
@@ -24,51 +41,90 @@ def analyse_combined_taxonomy(model_data, model_statistics, model_summary, posit
                                                                                 elements_data)
     elements, elements_statistics, elements_data = enforce_strategy_on_elements(rigidity, elements, elements_statistics,
                                                                                 elements_data)
-    return taxonomy_mean(elements, elements_statistics)
+    return taxonomy_mean(elements_statistics)
 
 
-def analyse_summary(model_summary):
+def analyse_summary(taxonomy_summary):
+    """
+    This function analyses the summary of the elements of the taxonomy and creates a dictionary that holds the name of
+    each element.
+    elements dictionary:
+        key: execution number of the element
+        value: name of the element executed as the initial seeding
+    :param taxonomy_summary: summary of the taxonomy elements
+    :return: the elements dictionary of the taxonomy
+    """
     elements = dict()
-    for i in range(len(model_summary)):
-        elements[model_summary.loc[i, 'execution_number']] = model_summary.loc[i, 'input_class_name']
+    for i in range(len(taxonomy_summary)):
+        elements[taxonomy_summary.loc[i, 'execution_number']] = taxonomy_summary.loc[i, 'input_class_name']
     return elements
 
 
-def analyse_data(model_data):
+def analyse_data(taxonomy_data):
+    """
+    This function analyses the data of the taxonomy elements and creates a dictionary that holds a dictionary of
+    data.
+    elements_data dictionary:
+        key: element
+        value: element_data dictionary
+            key: data name
+            value: data value
+    :param taxonomy_data: data of the taxonomy elements.
+    :return: returns the nested dictionary structure of elements_data dictionary
+    """
     elements_data = dict()
-    for i in range(0, len(model_data)):
+    for i in range(0, len(taxonomy_data)):
         # add all the necessary information about an element to the dictionary with the element name as the key
         element_data = dict()
 
         # adding each field of importance from the table to a dictionary
-        element_data['gufo_classification'] = model_data.loc[i, 'gufo_classification']
-        element_data['is_root'] = model_data.loc[i, 'is_root']
-        element_data['is_leaf'] = model_data.loc[i, 'is_leaf']
-        element_data['is_intermediate'] = model_data.loc[i, 'is_intermediate']
-        element_data['number_superclasses'] = model_data.loc[i, 'number_superclasses']
-        element_data['number_subclasses'] = model_data.loc[i, 'number_subclasses']
+        element_data['gufo_classification'] = taxonomy_data.loc[i, 'gufo_classification']
+        element_data['is_root'] = taxonomy_data.loc[i, 'is_root']
+        element_data['is_leaf'] = taxonomy_data.loc[i, 'is_leaf']
+        element_data['is_intermediate'] = taxonomy_data.loc[i, 'is_intermediate']
+        element_data['number_superclasses'] = taxonomy_data.loc[i, 'number_superclasses']
+        element_data['number_subclasses'] = taxonomy_data.loc[i, 'number_subclasses']
 
         # adding the element dictionary into a dictionary of elements_data
-        elements_data[model_data.loc[i, 'class_name']] = element_data
+        elements_data[taxonomy_data.loc[i, 'class_name']] = element_data
     return elements_data
 
 
-def analyse_statistics(model_statistics, elements):
-    # generates a dictionary of elements -> dictionary of statistics(stat->value)
+def analyse_statistics(taxonomy_statistics, elements):
+    """
+    This function analyses the statistics of the taxonomy elements and creates a dictionary that holds a dictionary of
+    statistics.
+    element_statistics dictionary:
+        key: element
+        value: stats dictionary
+            key: statistics name
+            value: statistics value
+    :param taxonomy_statistics: statistics of the taxonomy elements.
+    :param elements: elements of the taxonomy
+    :return: returns the nested dictionary structure elements_statistics dictionary
+    """
     elements_statistics = dict()
     i = 0
     for key in elements.keys():
         stats = dict()
-        stats['diff_pk_classes_types_p'] = model_statistics.loc[i, 'diff_pk_classes_types_p']
-        stats['diff_tk_classes_types_p'] = model_statistics.loc[i, 'diff_tk_classes_types_p']
-        stats['diff_known_classif_types_p'] = model_statistics.loc[i, 'diff_known_classif_types_p']
+        stats['diff_pk_classes_types_p'] = taxonomy_statistics.loc[i, 'diff_pk_classes_types_p']
+        stats['diff_tk_classes_types_p'] = taxonomy_statistics.loc[i, 'diff_tk_classes_types_p']
+        stats['diff_known_classif_types_p'] = taxonomy_statistics.loc[i, 'diff_known_classif_types_p']
         elements_statistics[elements[key]] = stats
         i = i + 1
     return elements_statistics
 
 
 def enforce_strategy_on_elements(strategy, elements, elements_statistics, elements_data):
-    # removes the elements that do not belong to the strategy of the run
+    """
+    This function enforces the given strategy to the information about the elements of the taxonomy.
+    This enforcing is done by removing all the elements that do not belong to the given strategy along with the information that belongs to them.
+    :param strategy: strategy to enforce on the taxonomy elements.
+    :param elements: elements of the taxonomy
+    :param elements_statistics: statistics of the elements of the taxonomy
+    :param elements_data: data of the elements of the taxonomy
+    :return: the elements, the element statistics, and the element data after the enforcement of the strategy
+    """
     match strategy:
         case "ROOT":
             elements_to_be_removed = []
@@ -179,7 +235,12 @@ def enforce_strategy_on_elements(strategy, elements, elements_statistics, elemen
     return elements, elements_statistics, elements_data
 
 
-def taxonomy_mean(elements, elements_statistics):
+def taxonomy_mean(elements_statistics):
+    """
+    This function calculates the mean of the statistics of the taxonomy
+    :param elements_statistics: the statistics of the taxonomy
+    :return: the means for the statistics of partially known classes, totally known classes, and classifications known
+    """
     taxonomy_diff_pk = []
     taxonomy_diff_tk = []
     taxonomy_classif_diff = []

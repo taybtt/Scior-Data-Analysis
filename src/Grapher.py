@@ -4,11 +4,20 @@ from dotenv import load_dotenv
 from matplotlib import pyplot as plt
 
 load_dotenv()
+# gets the output directory to put the graphs in from the .env file
 graphs_directory = os.getenv('OUTPUT_DIRECTORY')
 
 
 def make_strategy_graph(strategy_statistics, check_complete, strategies_to_skip):
+    """
+    This function generates a strategy comparison graph
+    :param strategy_statistics: the statistics for each strategy included in the graph
+    :param check_complete: whether the graph is created for CWA or OWA
+    :param strategies_to_skip: the strategies that needed to be skipped in the reading
+    """
     ax = make_graph_skeleton(strategy_statistics, check_complete, check_combined=False)
+
+    # deleting the strategies skipped from the graph
     for strategy in strategies_to_skip:
         del STRATEGIES[STRATEGIES.index(strategy)]
     ax.set_xticklabels(STRATEGIES)
@@ -24,8 +33,15 @@ def make_strategy_graph(strategy_statistics, check_complete, strategies_to_skip)
 
 
 def make_combined_strategy_graph(strategy_statistics, check_complete, strategies_to_skip):
+    """
+    This function generates a strategy combination graph
+    :param strategy_statistics: the statistics for each strategy included in the graph
+    :param check_complete: whether the graph is created for CWA or OWA
+    :param strategies_to_skip: the strategies that needed to be skipped in the reading
+    """
     ax = make_graph_skeleton(strategy_statistics, check_complete, check_combined=True)
 
+    # deleting the strategies skipped from the graph
     for strategy in strategies_to_skip:
         del COMBINED_STRATEGIES[COMBINED_STRATEGIES.index(strategy)]
     ax.set_xticklabels(COMBINED_STRATEGIES, rotation=45, fontsize=10)
@@ -41,7 +57,17 @@ def make_combined_strategy_graph(strategy_statistics, check_complete, strategies
 
 
 def make_graph_skeleton(strategy_statistics, check_complete, check_combined):
+    """
+    This function generates the skeleton of a graph
+    :param strategy_statistics: the statistics for each strategy included in the graph
+    :param check_complete: whether the graph is created for CWA or OWA
+    :param check_combined: whether the created skeleton is for a strategy comparison or combination graph
+    :return: the elements of the subplot of the graph
+    """
+
     strategy_names = []
+
+    # creating lists of the values for all the strategies
     strategy_diff_pk = []
     strategy_diff_tk = []
     strategy_classif_diff = []
@@ -53,10 +79,13 @@ def make_graph_skeleton(strategy_statistics, check_complete, check_combined):
     x = np.arange(len(strategy_statistics.keys()))
     width = 0.35
 
+    # the combination graph has different figure size
     if check_combined:
         fig, ax = plt.subplots(figsize=(10, 10))
     else:
         fig, ax = plt.subplots()
+
+    # plotting the values for all the strategies
     bars1 = ax.bar(x - width / 2, strategy_diff_pk, width, bottom=strategy_diff_tk, label='diff_pk')
     bars2 = ax.bar(x - width / 2, strategy_diff_tk, width, label='diff_tk')
     bars3 = ax.bar(x + width / 2, strategy_classif_diff, width, label='classif_diff')
@@ -77,6 +106,14 @@ def make_graph_skeleton(strategy_statistics, check_complete, check_combined):
 
 
 def generate_value_text(ax, bars1, bars2, bars3):
+    """
+    This function generates the value of each bar on top of the bar itself
+    :param ax: the elements of the subplot of the graph
+    :param bars1: the list of bars for partially known classes
+    :param bars2: the list of bars for totally known classes
+    :param bars3: the list of bars for classifications known
+    :return:
+    """
     for bar in bars3:
         height = bar.get_height()
         ax.text(bar.get_x() + bar.get_width() / 2, height, f'{round(height)}', ha='center', va='bottom', rotation=90)
@@ -91,6 +128,9 @@ def generate_value_text(ax, bars1, bars2, bars3):
                 va='bottom', rotation=90)
 
 
+"""
+Holds the shorthand notation for the strategies
+"""
 STRATEGIES = [
     'R',
     'L',
@@ -102,6 +142,9 @@ STRATEGIES = [
     'SRG'
 ]
 
+"""
+Holds the shorthand notation for the combined strategies
+"""
 COMBINED_STRATEGIES = [
     'R_S_RG',
     'R_S_ARG',
